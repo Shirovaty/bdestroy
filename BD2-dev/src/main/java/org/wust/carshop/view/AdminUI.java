@@ -30,7 +30,9 @@ public class AdminUI extends JFrame{
     private JComboBox stanowiskoBox;
     private JButton filterButton;
     private JButton addButton;
+    private JButton deleteSelectedButton;
     private DefaultTableModel model = new DefaultTableModel();
+    private boolean deleteBool;
     AdminService service;
     ActionListener allPartsListener = new ActionListener() {
         @Override
@@ -104,6 +106,7 @@ public class AdminUI extends JFrame{
                 case ALL_EMPLOYEES:
                     setModel(service.getAllEmployees());
                     table1.setModel(model);
+                    deleteBool = false;
                     break;
                 case ALL_FILTER:
                     previousActionListener = allPartsListener;
@@ -131,6 +134,20 @@ public class AdminUI extends JFrame{
                     filterButton.addActionListener(templateByNameListener);
                     break;
 
+            }
+        });
+        deleteSelectedButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                var item = comboBox1.getSelectedItem();
+                if(item== UtilEnum.ALL_EMPLOYEES ||
+                        item == UtilEnum.EMPLOYEES_BY_POSITION ||
+                        item == UtilEnum.EMPLOYEES_BY_FULL_NAME ||
+                        item == UtilEnum.EMPLOYEES_BY_FULL_NAME_AND_POSITION) {
+                        var row = table1.getSelectedRow();
+                        service.deleteEmployee(row);
+                        table1.updateUI();
+                }
             }
         });
     }
