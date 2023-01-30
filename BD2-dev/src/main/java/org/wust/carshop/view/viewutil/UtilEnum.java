@@ -1,13 +1,13 @@
 package org.wust.carshop.view.viewutil;
 
 public enum UtilEnum {
-    ALL_FILTER("Parts - full filter"),
     ALL_PARTS("All parts"),
+    ALL_FILTER("Parts - full filter"),
     FILTER_BY_CAR("Parts filtered by car"),
     FILTER_BY_CAR_AND_MANU("Parts filtered by car and manufacturer"),
     FILTER_BY_CAR_AND_TYPE("Parts filtered by car and type"),
     ALL_TEMPLATES("All templates"),
-    TEMPLATE_BY_NAME("Templates filtered by name"),
+    TEMPLATE_WHERE_NAME("Templates filtered by regex"),
     POSITIONS("Positions"),
     ALL_EMPLOYEES("All employees"),
     EMPLOYEES_BY_FULL_NAME("Employees filtered by full name"),

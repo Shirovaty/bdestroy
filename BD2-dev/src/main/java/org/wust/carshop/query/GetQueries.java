@@ -201,6 +201,29 @@ public class GetQueries {
             WHERE nazwa = :name
             """;
 
+    static public final String GET_MODEL_BY_BRAND = """
+            SELECT modele.nazwa
+            FROM modele
+            JOIN marki on marki.id = modele.marki_id
+            WHERE marki.nazwa = :name
+            """;
+
+    static public final String GET_TEMPLATE_WHERE_NAME = """
+            SELECT *
+            FROM szablony_napraw
+            WHERE nazwa like '%' || :name || '%'
+            """;
+
+    static public final String GET_PRACOWNICY_NAMES = """
+            SELECT imie
+            FROM pracownicy
+            """;
+
+    static public final String GET_PRACOWNICY_SURNAMES = """
+            SELECT nazwisko
+            FROM pracownicy
+            """;
+
     static public final String GET_PARTS_FOR_TEMPLATE = """
             SELECT wc.ilosc as quantity,
              p.id,

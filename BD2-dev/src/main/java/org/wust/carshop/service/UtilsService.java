@@ -7,6 +7,7 @@ import org.wust.carshop.mapper.PartPairMapper;
 import org.wust.carshop.mapper.RepairTemplateMapper;
 import org.wust.carshop.model.Part;
 import org.wust.carshop.model.RepairTemplate;
+import org.wust.carshop.util.PartPair;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -125,6 +126,27 @@ public class UtilsService {
     public List<String> getMarka() {
         return dbHandler.withHandle(handle ->
                 handle.createQuery(GET_CAR_MANUFACTURERS).mapTo(String.class)
+                        .list()
+        );
+    }
+    public List<String> getPracownicyNames() {
+        return dbHandler.withHandle(handle ->
+                handle.createQuery(GET_PRACOWNICY_NAMES).mapTo(String.class)
+                        .list()
+        );
+    }
+    public List<String> getModelsByBrand(String brandName) {
+        return dbHandler.withHandle(handle ->
+                handle.createQuery(GET_MODEL_BY_BRAND)
+                        .bind("name", brandName)
+                        .mapTo(String.class)
+                        .list()
+        );
+    }
+
+    public List<String> getPracownicySurnames() {
+        return dbHandler.withHandle(handle ->
+                handle.createQuery(GET_PRACOWNICY_SURNAMES).mapTo(String.class)
                         .list()
         );
     }

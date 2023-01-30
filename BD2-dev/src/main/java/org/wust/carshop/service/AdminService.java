@@ -4,11 +4,14 @@ import lombok.AllArgsConstructor;
 import org.jdbi.v3.core.Jdbi;
 import org.wust.carshop.exception.ServiceException;
 import org.wust.carshop.mapper.EmployeeMapper;
+import org.wust.carshop.mapper.PartPairMapper;
+import org.wust.carshop.mapper.RepairTemplateMapper;
 import org.wust.carshop.model.Employee;
 import org.wust.carshop.model.Part;
 import org.wust.carshop.model.RepairTemplate;
 import org.wust.carshop.util.PartPair;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
@@ -107,7 +110,7 @@ public class AdminService {
 
     public int deleteEmployee(Integer id) {
         return dbHandler.withHandle(handle -> handle.createUpdate(DELETE_EMPLOYEE)
-                .bind("is", id)
+                .bind("id", id)
                 .execute()
         );
     }
@@ -192,5 +195,26 @@ public class AdminService {
                         .list()
                         .isEmpty()
         );
+    }
+
+    public List<RepairTemplate> getRepairTemplateWhereName(String name) {
+        var templates = dbHandler.withHandle(handle ->
+                handle.createQuery(GET_TEMPLATE_WHERE_NAME)
+                        .bind("name", name)
+                        .map(new RepairTemplateMapper())
+        );
+
+        List<RepairTemplate> templatesOutput = new ArrayList<>();
+        for(var template : templates) {
+            var parts = dbHandler.withHandle(handle -> handle.createQuery(GET_PARTS_FOR_TEMPLATE)
+                    .bind("templateId", template.getId())
+                    .map(new PartPairMapper())
+                    .list()
+            );
+            template.setRequiredParts(parts);
+            templatesOutput.add(template);
+        }
+
+        return templatesOutput;
     }
 }

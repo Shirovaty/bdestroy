@@ -1,11 +1,13 @@
 package org.wust.carshop.view;
 
 import org.wust.carshop.service.AdminService;
-import org.wust.carshop.view.viewutil.AddForm;
+import org.wust.carshop.view.viewutil.AdminAddForm;
 import org.wust.carshop.view.viewutil.ComboboxEnumRenderer;
 import org.wust.carshop.view.viewutil.UtilEnum;
 
 import javax.swing.*;
+import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.ListSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -24,13 +26,13 @@ public class AdminUI extends JFrame{
     private JComboBox markaBox;
     private JComboBox producentBox;
     private JComboBox typBox;
-    private JComboBox wzorBox;
     private JComboBox imieBox;
     private JComboBox nazwiskoBox;
     private JComboBox stanowiskoBox;
     private JButton filterButton;
     private JButton addButton;
     private JButton deleteSelectedButton;
+    private JTextField wzoryField;
     private DefaultTableModel model = new DefaultTableModel();
     private boolean deleteBool;
     AdminService service;
@@ -66,12 +68,51 @@ public class AdminUI extends JFrame{
             table1.setModel(model);
         }
     };
-    ActionListener templateByNameListener = new ActionListener() {
+    ActionListener templateWhereNameListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            setModel(List.of(service.getRepairTemplateWhereName(wzoryField.getText())));
+            table1.setModel(model);
+        }
+    };
+    ActionListener employeesByFullNameListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
             String[] filterValues = getValues();
-            setModel(List.of(service.getRepairTemplateByName(filterValues[0])));
+            setModel(service.getEmployeesByFullName(filterValues[0], filterValues[1]));
             table1.setModel(model);
+        }
+    };
+
+    ActionListener employeesByPositionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String[] filterValues = getValues();
+            setModel(service.getEmployeesByPosition(filterValues[0]));
+            table1.setModel(model);
+        }
+    };
+
+    ActionListener employeesByFullNameAndPositionListener = new ActionListener() {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            String[] filterValues = getValues();
+            setModel(service.getEmployeeByFullNameAndPosition(filterValues[0], filterValues[1], filterValues[2]));
+            table1.setModel(model);
+        }
+    };
+
+    ListSelectionModel cellSelection = table1.getSelectionModel();
+
+    ListSelectionListener tableListener = new ListSelectionListener() {
+        @Override
+        public void valueChanged(ListSelectionEvent e) {
+            int a = table1.getSelectedRow();
+            int b = table1.getSelectedColumn();
+            if(model.getColumnName(b).equals("requiredParts")) {
+                JOptionPane.showMessageDialog(null, table1.getValueAt(a,b).toString());
+            }
+
         }
     };
 
@@ -89,7 +130,21 @@ public class AdminUI extends JFrame{
         setSize(1000,800);
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setVisible(true);
-        setModel(service.getAllRepairTemplates());
+        resetAccess();
+        table1.setDefaultEditor(Object.class, null);
+        setModel(service.getAllParts());
+        table1.setModel(model);
+        table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        cellSelection.addListSelectionListener(tableListener);
+        addButton.setMultiClickThreshhold(1000);
+
+
+        markaBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                modelBox.setModel(new DefaultComboBoxModel(LoginUI.us.getModelsByBrand(markaBox.getSelectedItem().toString()).toArray()));
+            }
+        });
 
         comboBox1.addActionListener(e -> {
             resetAccess();
@@ -99,42 +154,68 @@ public class AdminUI extends JFrame{
                     setModel(service.getAllParts());
                     table1.setModel(model);
                     break;
+                case POSITIONS:
+                    setModel(service.getAllPositions());
+                    table1.setModel(model);
                 case ALL_TEMPLATES:
                     setModel(service.getAllRepairTemplates());
                     table1.setModel(model);
+                    deleteSelectedButton.setEnabled(true);
                     break;
                 case ALL_EMPLOYEES:
                     setModel(service.getAllEmployees());
                     table1.setModel(model);
                     deleteBool = false;
+                    deleteSelectedButton.setEnabled(true);
                     break;
                 case ALL_FILTER:
                     previousActionListener = allPartsListener;
-                    setComboboxes(true, true, true, true, false, false, false, false);
+                    setComboboxes(true, true, true, true, false, false, false);
                     filterButton.addActionListener(allPartsListener);
                     break;
                 case FILTER_BY_CAR:
                     previousActionListener = filterByCarListener;
-                    setComboboxes(false, true, true, false, false, false, false, false);
+                    setComboboxes(false, true, true, false,  false, false, false);
                     filterButton.addActionListener(filterByCarListener);
                     break;
                 case FILTER_BY_CAR_AND_MANU:
                     previousActionListener = filterByCarAndManufacturerListener;
-                    setComboboxes(true, true, true, false, false, false, false, false);
+                    setComboboxes(true, true, true, false,  false, false, false);
                     filterButton.addActionListener(filterByCarAndManufacturerListener);
                     break;
                 case FILTER_BY_CAR_AND_TYPE:
                     previousActionListener = filterByCarAndTypeListener;
-                    setComboboxes(false, true, true, true, false, false, false, false);
+                    setComboboxes(false, true, true, true,  false, false, false);
                     filterButton.addActionListener(filterByCarAndTypeListener);
                     break;
-                case TEMPLATE_BY_NAME:
-                    previousActionListener = templateByNameListener;
-                    setComboboxes(false, false, false, false, true, false, false, false);
-                    filterButton.addActionListener(templateByNameListener);
+                case TEMPLATE_WHERE_NAME:
+                    previousActionListener = templateWhereNameListener;
+                    wzoryField.setEnabled(true);
+                    filterButton.setEnabled(true);
+                    deleteSelectedButton.setEnabled(true);
+                    filterButton.addActionListener(templateWhereNameListener);
+                    break;
+                case EMPLOYEES_BY_FULL_NAME:
+                    previousActionListener = employeesByFullNameListener;
+                    setComboboxes(false, false, false, false,  true, true, false);
+                    deleteSelectedButton.setEnabled(true);
+                    filterButton.addActionListener(employeesByFullNameListener);
+                    break;
+                case EMPLOYEES_BY_POSITION:
+                    previousActionListener = employeesByPositionListener;
+                    setComboboxes(false, false, false, false,  false, false, true);
+                    deleteSelectedButton.setEnabled(true);
+                    filterButton.addActionListener(employeesByPositionListener);
+                    break;
+                case EMPLOYEES_BY_FULL_NAME_AND_POSITION:
+                    previousActionListener = employeesByFullNameAndPositionListener;
+                    setComboboxes(false, false, false, false,  true, true, true);
+                    deleteSelectedButton.setEnabled(true);
+                    filterButton.addActionListener(employeesByFullNameAndPositionListener);
                     break;
 
             }
+
         });
         deleteSelectedButton.addActionListener(new ActionListener() {
             @Override
@@ -145,8 +226,15 @@ public class AdminUI extends JFrame{
                         item == UtilEnum.EMPLOYEES_BY_FULL_NAME ||
                         item == UtilEnum.EMPLOYEES_BY_FULL_NAME_AND_POSITION) {
                         var row = table1.getSelectedRow();
-                        service.deleteEmployee(row);
-                        table1.updateUI();
+                        var vector = model.getDataVector().get(row);
+                        service.deleteEmployee((Integer)vector.get(0));
+                        model.removeRow(row);
+                }
+                if(item == UtilEnum.ALL_TEMPLATES || item == UtilEnum.TEMPLATE_WHERE_NAME) {
+                    var row = table1.getSelectedRow();
+                    var vector = model.getDataVector().get(row);
+                    service.deleteRepairTemplate((Integer)vector.get(0));
+                    model.removeRow(row);
                 }
             }
         });
@@ -155,7 +243,12 @@ public class AdminUI extends JFrame{
     <E> void setModel(List<E> list) {
         model = new DefaultTableModel();
         List<String> headers = new ArrayList<>();
-        Field[] fields = list.get(0).getClass().getDeclaredFields();
+        Field[] fields = new Field[1];
+        try{
+            fields = list.get(0).getClass().getDeclaredFields();
+        } catch (IndexOutOfBoundsException ex) {
+            JOptionPane.showMessageDialog(null, "No record found");
+        }
         table1.getTableHeader().setReorderingAllowed(false);
         table1.getTableHeader().setResizingAllowed(false);
         for (Field field : fields) {
@@ -164,7 +257,7 @@ public class AdminUI extends JFrame{
         addButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
-                new AddForm(service);
+                new AdminAddForm(service);
             }
         });
         model.setColumnIdentifiers(headers.toArray());
@@ -202,16 +295,12 @@ public class AdminUI extends JFrame{
             output[count] = typBox.getSelectedItem().toString();
             count++;
         }
-        if(wzorBox.isEnabled()) {
-            output[count] = wzorBox.getSelectedItem().toString();
-            count++;
-        }
         if(imieBox.isEnabled()) {
             output[count] = imieBox.getSelectedItem().toString();
             count++;
         }
         if (nazwiskoBox.isEnabled()) {
-            output[count] = imieBox.getSelectedItem().toString();
+            output[count] = nazwiskoBox.getSelectedItem().toString();
             count++;
         }
         if (stanowiskoBox.isEnabled()) {
@@ -226,7 +315,6 @@ public class AdminUI extends JFrame{
                                boolean isMarka,
                                boolean isModel,
                                boolean isTyp,
-                               boolean isWzor,
                                boolean isImie,
                                boolean isNazwisko,
                                boolean isStanowisko){
@@ -242,17 +330,29 @@ public class AdminUI extends JFrame{
             markaBox.setModel(new DefaultComboBoxModel(LoginUI.us.getMarka().toArray()));
         }
         if(isModel) {
-            modelBox.setEnabled(true);
-            modelBox.setModel(new DefaultComboBoxModel(LoginUI.us.getModel().toArray()));
+            if(isMarka){
+                modelBox.setEnabled(true);
+                modelBox.setModel(new DefaultComboBoxModel(LoginUI.us.getModelsByBrand(markaBox.getSelectedItem().toString()).toArray()));
+            }else{
+                modelBox.setEnabled(true);
+                modelBox.setModel(new DefaultComboBoxModel(LoginUI.us.getModel().toArray()));
+            }
         }
         if(isTyp) {
             typBox.setEnabled(true);
             typBox.setModel(new DefaultComboBoxModel(LoginUI.us.getTypes().toArray()));
         }
-
-        if(isWzor) {
-            wzorBox.setEnabled(true);
-            wzorBox.setModel(new DefaultComboBoxModel(LoginUI.us.getTemplatesNames().toArray()));
+        if (isImie) {
+            imieBox.setEnabled(true);
+            imieBox.setModel(new DefaultComboBoxModel(LoginUI.us.getPracownicyNames().toArray()));
+        }
+        if (isNazwisko) {
+            nazwiskoBox.setEnabled(true);
+            nazwiskoBox.setModel(new DefaultComboBoxModel(LoginUI.us.getPracownicySurnames().toArray()));
+        }
+        if(isStanowisko) {
+            stanowiskoBox.setEnabled(true);
+            stanowiskoBox.setModel(new DefaultComboBoxModel(service.getAllPositions().toArray()));
         }
 
     }
@@ -262,11 +362,12 @@ public class AdminUI extends JFrame{
         markaBox.setEnabled(false);
         modelBox.setEnabled(false);
         typBox.setEnabled(false);
-        wzorBox.setEnabled(false);
         imieBox.setEnabled(false);
         nazwiskoBox.setEnabled(false);
         stanowiskoBox.setEnabled(false);
         filterButton.setEnabled(false);
+        deleteSelectedButton.setEnabled(false);
+        wzoryField.setEnabled(false);
     }
 
 

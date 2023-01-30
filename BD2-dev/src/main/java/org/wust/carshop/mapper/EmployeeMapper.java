@@ -1,3 +1,4 @@
+
 package org.wust.carshop.mapper;
 
 import org.jdbi.v3.core.mapper.RowMapper;
@@ -15,6 +16,7 @@ public class EmployeeMapper implements RowMapper<Employee> {
                 .name(rs.getString("imie"))
                 .surname(rs.getString("nazwisko"))
                 .position(rs.getString("nazwa"))
+                .login(rs.getString("login"))
                 .build();
     }
 }
