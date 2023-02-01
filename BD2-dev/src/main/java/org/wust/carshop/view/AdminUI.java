@@ -71,7 +71,7 @@ public class AdminUI extends JFrame{
     ActionListener templateWhereNameListener = new ActionListener() {
         @Override
         public void actionPerformed(ActionEvent e) {
-            setModel(List.of(service.getRepairTemplateWhereName(wzoryField.getText())));
+            setModel(service.getRepairTemplatesByName(wzoryField.getText()));
             table1.setModel(model);
         }
     };
@@ -111,8 +111,8 @@ public class AdminUI extends JFrame{
             int b = table1.getSelectedColumn();
             if(model.getColumnName(b).equals("requiredParts")) {
                 JOptionPane.showMessageDialog(null, table1.getValueAt(a,b).toString());
+                table1.clearSelection();
             }
-
         }
     };
 
@@ -154,9 +154,6 @@ public class AdminUI extends JFrame{
                     setModel(service.getAllParts());
                     table1.setModel(model);
                     break;
-                case POSITIONS:
-                    setModel(service.getAllPositions());
-                    table1.setModel(model);
                 case ALL_TEMPLATES:
                     setModel(service.getAllRepairTemplates());
                     table1.setModel(model);
@@ -225,15 +222,15 @@ public class AdminUI extends JFrame{
                         item == UtilEnum.EMPLOYEES_BY_POSITION ||
                         item == UtilEnum.EMPLOYEES_BY_FULL_NAME ||
                         item == UtilEnum.EMPLOYEES_BY_FULL_NAME_AND_POSITION) {
-                        var row = table1.getSelectedRow();
-                        var vector = model.getDataVector().get(row);
-                        service.deleteEmployee((Integer)vector.get(0));
+                        int row = table1.getSelectedRow();
+                        int id = (int)model.getValueAt(row, 0);
+                        service.deleteEmployee(id);
                         model.removeRow(row);
                 }
                 if(item == UtilEnum.ALL_TEMPLATES || item == UtilEnum.TEMPLATE_WHERE_NAME) {
                     var row = table1.getSelectedRow();
-                    var vector = model.getDataVector().get(row);
-                    service.deleteRepairTemplate((Integer)vector.get(0));
+                    var vector = model.getValueAt(row, 0);
+                    service.deleteEmployee((int)vector);
                     model.removeRow(row);
                 }
             }

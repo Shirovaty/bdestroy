@@ -1,6 +1,9 @@
 package org.wust.carshop.view;
 
 import org.wust.carshop.service.MechanicService;
+import org.wust.carshop.view.viewutil.AddPartsToRepair;
+import org.wust.carshop.view.viewutil.CreateRepair;
+import org.wust.carshop.view.viewutil.CreateZamowienie;
 
 import javax.swing.*;
 import javax.swing.event.ListSelectionEvent;
@@ -21,9 +24,11 @@ public class MechanicUI extends JFrame {
     private JTextField startField;
     private JTextField endField;
     private JTextField priceField;
-    private JButton updateButton;
+    private JButton finalizeSelectedButton;
     private JButton clearSelectionButton;
     private JButton addNewButton;
+    private JButton createOrderButton;
+    private JButton addToRepairButton;
 
     ListSelectionModel cellSelection = table1.getSelectionModel();
 
@@ -31,8 +36,10 @@ public class MechanicUI extends JFrame {
         @Override
         public void valueChanged(ListSelectionEvent e) {
             int a = table1.getSelectedRow();
-            System.out.println(model.getDataVector().get(a));
-
+            int b = table1.getSelectedColumn();
+            if(model.getColumnName(b).equals("repairedCar") || model.getColumnName(b).equals("mechanic")) {
+                JOptionPane.showMessageDialog(null, table1.getValueAt(a,b).toString());
+            }
         }
     };
 
@@ -49,15 +56,38 @@ public class MechanicUI extends JFrame {
         table1.setModel(model);
         table1.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
         cellSelection.addListSelectionListener(tableListener);
+        finalizeSelectedButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int row = table1.getSelectedRow();
+                service.finalizeRepair((int)table1.getValueAt(row,0));
+                model.removeRow(row);
+            }
+        });
+
+        addToRepairButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                int row = table1.getSelectedRow();
+                new AddPartsToRepair(service, (int)model.getValueAt(row, 0));
+            }
+        });
+        addNewButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new CreateRepair(service);
+            }
+        });
+        createOrderButton.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                new CreateZamowienie(service);
+            }
+        });
         clearSelectionButton.addActionListener(new ActionListener() {
             @Override
             public void actionPerformed(ActionEvent e) {
                 table1.clearSelection();
-                repairedField.setText("");
-                mechanicField.setText("");
-                startField.setText("");
-                endField.setText("");
-                priceField.setText("");
             }
         });
     }

@@ -105,6 +105,8 @@ public class StoremanService {
         );
     }
 
+
+
     public List<Part> getPartsByFullFilter(String carModel, String carBrand,
                                                String manufacturer, String type) {
         return dbHandler.withHandle(handle ->
@@ -199,32 +201,76 @@ public class StoremanService {
     }
 
     public boolean partExists(String serialNumber) {
-        return !dbHandler.withHandle(handle ->
+        var foundIds =  dbHandler.withHandle(handle ->
                 handle.createQuery(PART_EXISTS)
                         .bind("serialNumber", serialNumber)
                         .mapTo(Integer.class)
-                        .list()
-                        .isEmpty()
+                        .one()
         );
+
+        return foundIds > 0;
+    }
+
+    public boolean carBrandExists(String name) {
+        var foundIds = dbHandler.withHandle(handle ->
+                handle.createQuery(BRAND_EXISTS)
+                        .bind("name", name)
+                        .mapTo(Integer.class)
+                        .one()
+        );
+        return foundIds >0;
+    }
+
+    public boolean carModelExists(String name) {
+        var foundIds = dbHandler.withHandle(handle ->
+                handle.createQuery(MODEL_EXISTS)
+                        .bind("name", name)
+                        .mapTo(Integer.class)
+                        .one()
+        );
+        return foundIds >0;
     }
 
     public boolean partTypeExists(String name) {
-        return !dbHandler.withHandle(handle ->
+        var foundIds = dbHandler.withHandle(handle ->
                 handle.createQuery(PART_TYPE_EXISTS)
                         .bind("name", name)
                         .mapTo(Integer.class)
-                        .list()
-                        .isEmpty()
+                        .one()
+        );
+
+        return foundIds > 0;
+    }
+
+    public int addCarBrand(String name) {
+        return dbHandler.withHandle(handle -> handle.createUpdate(INSERT_CAR_BRAND)
+                .bind("name", name)
+                .execute()
+        );
+    }
+
+    public int addCarModel(String name, String brand) {
+        var brandId = dbHandler.withHandle(handle -> handle.createQuery(GET_BRAND_ID_BY_NAME)
+                .bind("name", brand)
+                .mapTo(Integer.class)
+                .one()
+        );
+
+        return dbHandler.withHandle(handle -> handle.createUpdate(INSERT_CAR_MODEL)
+                .bind("name", name)
+                .bind("brandId", brandId)
+                .execute()
         );
     }
 
     public boolean partProducerExists(String name) {
-        return !dbHandler.withHandle(handle ->
+        var foundIds = dbHandler.withHandle(handle ->
                 handle.createQuery(PART_PRODUCER_EXISTS)
                         .bind("name", name)
                         .mapTo(Integer.class)
-                        .list()
-                        .isEmpty()
+                        .one()
         );
+
+        return foundIds > 0;
     }
 }

@@ -8,7 +8,6 @@ public enum UtilEnum {
     FILTER_BY_CAR_AND_TYPE("Parts filtered by car and type"),
     ALL_TEMPLATES("All templates"),
     TEMPLATE_WHERE_NAME("Templates filtered by regex"),
-    POSITIONS("Positions"),
     ALL_EMPLOYEES("All employees"),
     EMPLOYEES_BY_FULL_NAME("Employees filtered by full name"),
     EMPLOYEES_BY_POSITION("Employees filtered by position"),

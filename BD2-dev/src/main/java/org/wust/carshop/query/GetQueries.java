@@ -208,11 +208,17 @@ public class GetQueries {
             WHERE marki.nazwa = :name
             """;
 
-    static public final String GET_TEMPLATE_WHERE_NAME = """
+    static public final String GET_FILTERED_TEMPLATES = """
             SELECT *
             FROM szablony_napraw
-            WHERE nazwa like '%' || :name || '%'
+            WHERE nazwa like :arg
             """;
+
+    static public final String GET_ALL_CARS = """
+            SELECT *
+            FROM samochody
+            """;
+
 
     static public final String GET_PRACOWNICY_NAMES = """
             SELECT imie
@@ -372,7 +378,43 @@ public class GetQueries {
              JOIN modele cm ON cm.id = p.modele_id
              JOIN producenci pm ON pm.id = p.producenci_id
              JOIN marki m ON m.id = cm.marki_id
-             WHERE p.numer_seryjny = :name
+             WHERE p.id = :name
               """;
+
+    static public final String CLIENT_EXISTS = """
+            SELECT COUNT(klienci.id)
+            FROM klienci
+            JOIN adres ON klienci.adres_id = adres.id
+            WHERE imie = :name
+            AND nazwisko = :surname
+            AND miasto = :city AND kod_pocztowy = :postalCode AND ulica = :street
+            AND numer_budynku = :building AND numer_mieszkania = :apartment
+            """;
+
+    static public final String CAR_EXISTS = """
+            SELECT COUNT(VIN)
+            FROM samochody
+            WHERE VIN = :VIN
+            """;
+
+    static public final String GET_CLIENT_ID = """
+            SELECT klienci.id
+            FROM klienci
+            JOIN adres ON adres.id = klienci.adres_id
+            WHERE imie = :name
+            AND nazwisko = :surname
+            AND miasto = :city AND kod_pocztowy = :postalCode AND ulica = :street
+            AND numer_budynku = :building AND numer_mieszkania = :apartment
+            """;
+
+    static public final String GET_ADDRESS_ID = """
+            SELECT id
+            FROM adres
+            WHERE miasto = :city
+            AND ulica = :street
+            AND numer_budynku = :building
+            AND numer_mieszkania = :apartment
+            AND kod_pocztowy = :postalCode
+            """;
 
 }

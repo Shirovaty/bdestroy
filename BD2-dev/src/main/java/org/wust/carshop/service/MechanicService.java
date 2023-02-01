@@ -103,7 +103,7 @@ public class MechanicService {
     }
 
     public boolean addressExists(Address address) {
-        return !dbHandler.withHandle(handle ->
+        var foundIds =  dbHandler.withHandle(handle ->
                 handle.createQuery(ADDRESS_EXISTS)
                         .bind("city", address.getCity())
                         .bind("street", address.getStreet())
@@ -111,9 +111,10 @@ public class MechanicService {
                         .bind("building", address.getBuildingNumber())
                         .bind("apartment", address.getApartment())
                         .mapTo(Integer.class)
-                        .list()
-                        .isEmpty()
+                        .one()
         );
+
+        return foundIds > 0;
     }
 
     public List<Client> getClientsByFulName(String name, String surname) {
@@ -128,11 +129,13 @@ public class MechanicService {
 
     public Client createClient(Client client) {
         var address = client.getAddress();
-        var addressCreated = createAddress(address);
-
-        if (addressCreated != 1) {
-            throw new ServiceException("Failed to INSERT address: " + address);
+        if(!addressExists(client.getAddress())){
+            var addressCreated = createAddress(address);
+            if (addressCreated != 1) {
+                throw new ServiceException("Failed to INSERT address: " + address);
+            }
         }
+
 
         var addressId = dbHandler.withHandle(handle ->
                 handle.createQuery(GET_MAX_ADDRESS_ID)
@@ -254,6 +257,68 @@ public class MechanicService {
     public List<Part> getPartsByCarAndManufacturer(String carModel,
                                                        String carBrand, String manufacturer) {
         return us.getPartsByCarAndManufacturer(carModel, carBrand, manufacturer);
+    }
+
+    public Integer getClientId(Client client) {
+        var address = client.getAddress();
+
+        return dbHandler.withHandle(handle ->
+                handle.createQuery(CLIENT_EXISTS)
+                        .bind("city", address.getCity())
+                        .bind("street", address.getStreet())
+                        .bind("postalCode", address.getPostalCode())
+                        .bind("building", address.getBuildingNumber())
+                        .bind("apartment", address.getApartment())
+                        .bind("name", client.getName())
+                        .bind("surname", client.getSurname())
+                        .mapTo(Integer.class)
+                        .findOne()
+                        .orElse(null)
+        );
+    }
+
+    public Integer getAddressId(Address address) {
+        return dbHandler.withHandle(handle ->
+                handle.createQuery(GET_ADDRESS_ID)
+                        .bind("city", address.getCity())
+                        .bind("street", address.getStreet())
+                        .bind("postalCode", address.getPostalCode())
+                        .bind("building", address.getBuildingNumber())
+                        .bind("apartment", address.getApartment())
+                        .mapTo(Integer.class)
+                        .findOne()
+                        .orElse(null)
+        );
+    }
+
+    public boolean carExists(String vin) {
+        var foundIds =  dbHandler.withHandle(handle ->
+                handle.createQuery(CAR_EXISTS)
+                        .bind("VIN", vin)
+                        .mapTo(Integer.class)
+                        .one()
+        );
+
+        return foundIds > 0;
+    }
+
+    public boolean clientExists(Client client) {
+        var address = client.getAddress();
+
+        var foundIds =  dbHandler.withHandle(handle ->
+                handle.createQuery(CLIENT_EXISTS)
+                        .bind("city", address.getCity())
+                        .bind("street", address.getStreet())
+                        .bind("postalCode", address.getPostalCode())
+                        .bind("building", address.getBuildingNumber())
+                        .bind("apartment", address.getApartment())
+                        .bind("name", client.getName())
+                        .bind("surname", client.getSurname())
+                        .mapTo(Integer.class)
+                        .one()
+        );
+
+        return foundIds > 0;
     }
 
     public List<Part> getPartsByCarAndType(String carModel,
@@ -379,6 +444,7 @@ public class MechanicService {
                         .one()
         );
     }
+
 
     private void checkRequiredParts(RepairTemplate template) {
         template.getRequiredParts().forEach(pair -> {

@@ -197,24 +197,26 @@ public class AdminService {
         );
     }
 
-    public List<RepairTemplate> getRepairTemplateWhereName(String name) {
-        var templates = dbHandler.withHandle(handle ->
-                handle.createQuery(GET_TEMPLATE_WHERE_NAME)
-                        .bind("name", name)
-                        .map(new RepairTemplateMapper())
-        );
+    public List<RepairTemplate> getRepairTemplatesByName(String pattern) {
+        return dbHandler.withHandle(handle -> {
+            var templateSignatures = handle.createQuery(GET_FILTERED_TEMPLATES)
+                    .bind("arg", "%" + pattern + "%")
+                    .map(new RepairTemplateMapper())
+                    .list();
 
-        List<RepairTemplate> templatesOutput = new ArrayList<>();
-        for(var template : templates) {
-            var parts = dbHandler.withHandle(handle -> handle.createQuery(GET_PARTS_FOR_TEMPLATE)
-                    .bind("templateId", template.getId())
-                    .map(new PartPairMapper())
-                    .list()
-            );
-            template.setRequiredParts(parts);
-            templatesOutput.add(template);
-        }
+            List<RepairTemplate> fullTemplates = new ArrayList<>();
 
-        return templatesOutput;
+            templateSignatures.forEach(template -> {
+                var parts = handle.createQuery(GET_PARTS_FOR_TEMPLATE)
+                        .bind("templateId", template.getId())
+                        .map(new PartPairMapper())
+                        .list();
+
+                template.setRequiredParts(parts);
+                fullTemplates.add(template);
+            });
+
+            return fullTemplates;
+        });
     }
 }

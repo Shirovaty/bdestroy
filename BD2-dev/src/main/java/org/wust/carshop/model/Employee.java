@@ -13,4 +13,10 @@ public class Employee {
     private final String name;
     private final String surname;
     private final String login;
+
+    @Override
+    public String toString() {
+        return   name +
+                ", " + surname;
+    }
 }

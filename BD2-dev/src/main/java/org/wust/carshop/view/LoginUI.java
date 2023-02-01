@@ -50,7 +50,7 @@ public class LoginUI extends JFrame {
                 break;
             case "mechanic":
                 try{
-                    //handler = ls.validateRole("mechanik", passwordField.getText());
+                    handler = ls.validateRole("mechanik", passwordField.getText());
                 }catch (ServiceException e) {
                     JOptionPane.showMessageDialog(null, "Wrong password");
                     break;
@@ -64,7 +64,7 @@ public class LoginUI extends JFrame {
                 break;
             case "storeman":
                 try{
-                    //handler = ls.validateRole("magazynier", passwordField.getText());
+                    handler = ls.validateRole("magazynier", passwordField.getText());
                 }catch (ServiceException e) {
                     JOptionPane.showMessageDialog(null, "Wrong password");
                     break;

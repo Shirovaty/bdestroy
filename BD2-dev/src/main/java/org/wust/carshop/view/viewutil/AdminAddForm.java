@@ -16,7 +16,7 @@ public class AdminAddForm extends JFrame {
     private JPanel panel1;
     private JTextField nazwaField;
     private JButton addButton;
-    private JComboBox czesciBox;
+    private JComboBox<Part> czesciBox;
     private JButton addPartButton;
     private JSpinner iloscSpin;
     private JTextPane partSum;
@@ -37,7 +37,7 @@ public class AdminAddForm extends JFrame {
         this.service = service;
         setTitle("CarShopDB - add form");
         setContentPane(panel1);
-        setSize(1200,800);
+        setSize(1400,800);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
         setVisible(true);
         updateModels();
@@ -46,7 +46,7 @@ public class AdminAddForm extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 if((Integer)iloscSpin.getValue() > 0) {
-                    Part part = LoginUI.us.getPartByID(czesciBox.getSelectedItem().toString().substring(0,15)).get(0);
+                    Part part = LoginUI.us.getPartByID(((Part)czesciBox.getSelectedItem()).getId()).get(0);
                     int count = (Integer)iloscSpin.getValue();
                     chosenParts.add(new PartPair(part, count));
                     partsSummary = partsSummary.concat(czesciBox.getSelectedItem().toString() + " x " + count + ", \n");
@@ -81,11 +81,17 @@ public class AdminAddForm extends JFrame {
                 service.addEmployee(employee);
             }
         });
+        czesciBox.addActionListener(new ActionListener() {
+            @Override
+            public void actionPerformed(ActionEvent e) {
+                JOptionPane.showMessageDialog(null,czesciBox.getSelectedItem());
+            }
+        });
 
     }
     
     public void updateModels() {
-        czesciBox.setModel(new DefaultComboBoxModel(LoginUI.us.getAllParts().stream().map(e -> e.getSerialNumber() + " " + e.getCategory()).toArray()));
+        czesciBox.setModel(new DefaultComboBoxModel<Part>(LoginUI.us.getAllParts().toArray(Part[]::new)));
         stanowiskoBox.setModel(new DefaultComboBoxModel(service.getAllPositions().toArray()));
     }
 

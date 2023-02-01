@@ -2,9 +2,11 @@ package org.wust.carshop.service;
 
 import lombok.AllArgsConstructor;
 import org.jdbi.v3.core.Jdbi;
+import org.wust.carshop.mapper.EmployeeMapper;
 import org.wust.carshop.mapper.PartMapper;
 import org.wust.carshop.mapper.PartPairMapper;
 import org.wust.carshop.mapper.RepairTemplateMapper;
+import org.wust.carshop.model.Employee;
 import org.wust.carshop.model.Part;
 import org.wust.carshop.model.RepairTemplate;
 import org.wust.carshop.util.PartPair;
@@ -144,6 +146,14 @@ public class UtilsService {
         );
     }
 
+    public List<Employee> getAllEmployees() {
+        return dbHandler.withHandle(handle -> handle.createQuery(GET_ALL_EMPLOYEES)
+                .map(new EmployeeMapper())
+                .list()
+        );
+    }
+
+
     public List<String> getPracownicySurnames() {
         return dbHandler.withHandle(handle ->
                 handle.createQuery(GET_PRACOWNICY_SURNAMES).mapTo(String.class)
@@ -171,7 +181,7 @@ public class UtilsService {
                         .list()
         );
     }
-    public List<Part> getPartByID(String id){
+    public List<Part> getPartByID(int id){
         return dbHandler.withHandle(handle ->
                 handle.createQuery(GET_PART_BY_ID).bind("name", id)
                         .map(new PartMapper())

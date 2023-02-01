@@ -11,4 +11,11 @@ public class Client {
     private Address address;
     private final String name;
     private final String surname;
+
+    @Override
+    public String toString() {
+        return   address +
+                ", " + name +
+                ", " + surname;
+    }
 }

@@ -13,5 +13,13 @@ public class Car {
     private final int productionYear;
     private final Client owner;
 
-
+    @Override
+    public String toString() {
+        return color+
+                ", " + model +
+                ", " + brand  +
+                ", " + VIN  +
+                ", " + productionYear +
+                ", " + owner;
+    }
 }
